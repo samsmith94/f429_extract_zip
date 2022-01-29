@@ -1,0 +1,46 @@
+#include <Arduino.h>
+
+//#include <stdio.h>
+//#include "SEGGER_RTT.h"
+
+#define RED_LED   PB14
+#define GREEN_LED PB0
+#define BLUE_LED  PB7
+
+#define RELAY_1   PE1
+#define RELAY_2   PG12
+
+#define ACTIVE_LED BLUE_LED
+
+//HardwareSerial Serial1(PG9, PG14);
+
+
+void setup() {
+  //Serial1.begin(115200);
+  //SEGGER_RTT_ConfigUpBuffer(0, NULL, NULL, 0, SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL);
+
+  //SEGGER_RTT_WriteString(0, "SEGGER Real-Time-Terminal Sample\r\n\r\n");
+  //SEGGER_RTT_WriteString(0, "###### Testing SEGGER_printf() ######\r\n");
+
+  //printf("Hello\r\n");
+
+  Serial.begin(115200);
+
+  pinMode(ACTIVE_LED, OUTPUT);
+  pinMode(RELAY_1, OUTPUT);
+  pinMode(RELAY_2, OUTPUT);
+
+}
+
+void loop() {
+  //Serial1.println("Hello\r\n");
+  Serial.println("Hello");
+  digitalWrite(ACTIVE_LED, HIGH);
+  digitalWrite(RELAY_1, HIGH);
+  digitalWrite(RELAY_2, HIGH);
+  delay(1000);
+  digitalWrite(ACTIVE_LED, LOW);
+  digitalWrite(RELAY_1, LOW);
+  digitalWrite(RELAY_2, LOW);
+  delay(1000);
+}
