@@ -4,6 +4,10 @@
 #include "SdFat.h"
 #include "sdios.h"
 
+#include <Servo.h>
+Servo servo1;
+Servo servo2;
+
 #define RED_LED PB14
 #define GREEN_LED PB0
 #define BLUE_LED PB7
@@ -238,21 +242,52 @@ void printConfig(SdioConfig config) {
 
 //HardwareSerial Serial1(PG9, PG14);
 
+void button_ISR()
+{
+  Serial.println("Reset");
+  HAL_NVIC_SystemReset();
+}
+
+int buttonPin = PC13;
+
+
+//SdFat32 sd;
+File32 file;
+File32 root;
+
+
 void setup()
 {
   //Serial1.begin(115200);
 
   Serial.begin(115200);
 
+  /*
+  servo1.attach(PC9);
+  servo2.attach(PC6);
+  while(1) {
+    for (int i = 0; i < 180; i++) {
+      servo1.write(i);
+      servo2.write(i);
+      delay(3);
+    }
+    for (int i = 180; i > 0; i--) {
+      servo1.write(i);
+      servo2.write(i);
+      delay(3);
+    }
+  }
+  */
+
   // pinMode(ACTIVE_LED, OUTPUT);
   // pinMode(RELAY_1, OUTPUT);
   // pinMode(RELAY_2, OUTPUT);
 
-  // // Select RTC clock source: LSI_CLOCK, LSE_CLOCK or HSE_CLOCK.
-  // // By default the LSI is selected as source.
-  // //rtc.setClockSource(STM32RTC::LSE_CLOCK);
+  // Select RTC clock source: LSI_CLOCK, LSE_CLOCK or HSE_CLOCK.
+  // By default the LSI is selected as source.
+  //rtc.setClockSource(STM32RTC::LSE_CLOCK);
 
-  // rtc.begin(); // initialize RTC 24H format
+  rtc.begin(); // initialize RTC 24H format
 
   // // Set the time
   // rtc.setHours(hours);
@@ -265,23 +300,29 @@ void setup()
   // rtc.setMonth(month);
   // rtc.setYear(year);
 
-  // you can use also
-  //rtc.setTime(hours, minutes, seconds);
-  //rtc.setDate(weekDay, day, month, year);
+  // // you can use also
+  // rtc.setTime(hours, minutes, seconds);
+  // rtc.setDate(weekDay, day, month, year);
 
+  // pinMode(buttonPin, INPUT);
+  // attachInterrupt(digitalPinToInterrupt(buttonPin), button_ISR, FALLING);
+
+  
   while (!Serial) {
     yield();
   }
   cout << F("SdFat version: ") << SD_FAT_VERSION_STR << endl;
   printConfig(SD_CONFIG);
+  
 }
+
 
 void loop()
 {
   //Serial1.println("Hello\r\n");
   //Serial.println("Hello");
 
-  // Print date...
+  // // Print date...
   // Serial.printf("%02d/%02d/%02d ", rtc.getDay(), rtc.getMonth(), rtc.getYear());
   // // ...and time
   // Serial.printf("%02d:%02d:%02d.%03d\n", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getSubSeconds());
@@ -297,8 +338,8 @@ void loop()
   // delay(1000);
 
 
-
-    // Read any existing Serial data.
+  
+  // Read any existing Serial data.
   clearSerialInput();
 
   // F stores strings in flash to save RAM
@@ -346,4 +387,31 @@ void loop()
     return;
   }
   dmpVol();
+  
+
+  /***************/
+  // Initialize the SD card.
+  if (!sd.begin(SD_CONFIG)) {
+    sd.initErrorHalt(&Serial);
+  }
+
+  int rootFileCount = 0;
+  if (!root.open("/")) {
+    Serial.println("open root");
+  }
+  // Create a new folder.
+  if (!sd.mkdir("Folder1")) {
+    Serial.println("Create Folder1 failed");
+  }
+
+  // Create a file in Folder1 using a path.
+  if (!file.open("Folder1/file1.txt", O_WRONLY | O_CREAT)) {
+    Serial.println("create Folder1/file1.txt failed");
+  }
+
+  file.println("Hello 1, 2, 3");
+  file.close();
+  cout << F("Created Folder1/file1.txt\n");
+
+
 }
