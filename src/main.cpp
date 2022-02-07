@@ -4,7 +4,7 @@
 #include "SdFat.h"
 #include "sdios.h"
 
-#define BUFF_SIZE 512
+#define BUFF_SIZE 1024
 static uint8_t l_Buff[BUFF_SIZE];
 
 SPIClass SPI_4(PE6, PE5, PE2); // MOSI, MISO. SCLK
@@ -177,13 +177,18 @@ void setup() {
     zip.locateFile("application.bin");
     zip.openCurrentFile();
 
+    int counter = 0;
+    int number_of_chunks = (fi.uncompressed_size / BUFF_SIZE);
     int rc, i;
     rc = 1;
     i = 0;
     while (rc > 0) {
-        //rc = unzReadCurrentFile(zHandle, szTemp, sizeof(szTemp));
+        if (counter == number_of_chunks) {
+          break;
+        }
         rc = zip.readCurrentFile(l_Buff, BUFF_SIZE);
         binFile.write(l_Buff, BUFF_SIZE);
+        counter++;
         if (rc >= 0) {
             i += rc;
         } else {
